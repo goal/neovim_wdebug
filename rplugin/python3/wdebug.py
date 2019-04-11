@@ -129,3 +129,5 @@ class Work(object):
 
         if has_error:
             self.vim.command("clist")
+        else:
+            write_msg(self.vim, "compile success!")
