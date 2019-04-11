@@ -122,7 +122,9 @@ class Work(object):
                     result["lines"].append(line)
 
             if result["lines"]:
-                has_error = True
+                if not has_error:
+                    self.vim.call("setqflist", [], "f")
+                    has_error = True
                 self.vim.call("setqflist", [], "a", result)
 
         if has_error:
