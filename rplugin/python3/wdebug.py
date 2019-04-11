@@ -1,13 +1,19 @@
 import os
 from pathlib import Path
 import time
+import subprocess
+import re
+
 import pynvim as nvim
+
 
 def write_msg(vim, msg):
     vim.command("echomsg '%s'" % msg)
 
+
 def write_err_msg(vim, msg):
     vim.command("echohl Error | echomsg '%s' | echohl None" % msg)
+
 
 def wait_file_content(file_path, old_size, total_wait_secs, check_internal, check_content):
     wait_secs = 0
@@ -33,6 +39,7 @@ class Work(object):
         self.vim.command('nnoremap <C-x>j :Rd<cr>')
         self.vim.command('nnoremap <C-x>k :Rdv<cr>')
         self.vim.command('nnoremap <C-x>u :Ru<cr>')
+        self.vim.command('nnoremap <C-x>c :Run<cr>')
 
     @nvim.command('Rdv', range='', nargs='*', sync=True)
     def rdv_cmd(self, args, range):
@@ -82,7 +89,6 @@ class Work(object):
         else:
             write_err_msg(self.vim, "update fail")
 
-
     def _debug_values(self, values):
         line = "debug_message(\"" + ", ".join(
             "%s=%%O" % v for v in values) + "\", " + ", ".join(values) + ");"
@@ -90,3 +96,34 @@ class Work(object):
         r, c = cw.cursor
         spaces = " " * self.vim.call("cindent", r)
         self.vim.current.line = spaces + line
+
+    @nvim.command('Run', range='', nargs='*', sync=True)
+    def run_cmd(self, args, range):
+        filename = self.vim.current.buffer.name
+        cur_dir = Path(".").absolute()
+        rel_filename = os.path.relpath(filename, cur_dir)
+
+        p = subprocess.Popen(
+            ["../engine/engine.nostrip", "-l", "./", "-r", rel_filename],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        outdata, errdata = p.communicate()
+
+        all_lines = errdata.decode("utf8").splitlines()
+        error_patterns = {".+ line [\d]+: .*": "%f\ line\ %l:\ %m"}
+
+        has_error = False
+        for pattern, efm in error_patterns.items():
+            has_error = False
+            result = {"lines": [], "efm": efm}
+            p = re.compile(pattern)
+            for line in all_lines:
+                if p.match(line):
+                    result["lines"].append(line)
+
+            if result["lines"]:
+                has_error = True
+                self.vim.call("setqflist", [], "a", result)
+
+        if has_error:
+            self.vim.command("clist")
