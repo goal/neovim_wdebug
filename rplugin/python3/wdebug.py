@@ -90,8 +90,8 @@ class Work(object):
             write_err_msg(self.vim, "update fail")
 
     def _debug_values(self, values):
-        line = "debug_message(\"" + ", ".join(
-            "%s=%%O" % v for v in values) + "\", " + ", ".join(values) + ");"
+        line = 'F_ERROR("debug. %s.", %s);"' % (','.join('%s=%%O' % v for v in values),
+                                               ', '.join(values))
         cw = self.vim.current.window
         r, c = cw.cursor
         spaces = " " * self.vim.call("cindent", r)
