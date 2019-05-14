@@ -112,9 +112,11 @@ class Work(object):
         all_lines = errdata.decode("utf8").splitlines()
         error_patterns = {".+ line [\d]+: .*": "%f\ line\ %l:\ %m"}
 
+        # clear quickfix list
+        self.vim.call("setqflist", [], "f")
+
         has_error = False
         for pattern, efm in error_patterns.items():
-            has_error = False
             result = {"lines": [], "efm": efm}
             p = re.compile(pattern)
             for line in all_lines:
@@ -122,12 +124,12 @@ class Work(object):
                     result["lines"].append(line)
 
             if result["lines"]:
-                if not has_error:
-                    self.vim.call("setqflist", [], "f")
-                    has_error = True
+                has_error = True
+                # add to quickfix list
                 self.vim.call("setqflist", [], "a", result)
 
         if has_error:
-            self.vim.command("clist")
+            self.vim.command("cwindow")
         else:
+            self.vim.command("cclose")
             write_msg(self.vim, "compile success!")
