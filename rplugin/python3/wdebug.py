@@ -102,10 +102,10 @@ class Work(object):
         if self.vim.eval("g:loaded_session") and self.vim.call("exists", ":Denite"):
             self.vim.command("Denite quickfix")
         else:
-            self.vim.call("cwindow")
+            self.vim.command("cwindow")
 
     def _close_quickfix(self):
-        self.vim.call("cclose")
+        self.vim.command("cclose")
 
     @nvim.command('Run', range='', nargs='*', sync=True)
     def run_cmd(self, args, range):
