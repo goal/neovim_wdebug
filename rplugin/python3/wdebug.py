@@ -97,6 +97,16 @@ class Work(object):
         spaces = " " * self.vim.call("cindent", r)
         self.vim.current.line = spaces + line
 
+    def _show_quickfix(self):
+        # g:loaded_session test for denite-extra
+        if self.vim.eval("g:loaded_session") and self.vim.call("exists", ":Denite"):
+            self.vim.command("Denite quickfix")
+        else:
+            self.vim.call("cwindow")
+
+    def _close_quickfix(self):
+        self.vim.call("cclose")
+
     @nvim.command('Run', range='', nargs='*', sync=True)
     def run_cmd(self, args, range):
         filename = self.vim.current.buffer.name
@@ -129,7 +139,7 @@ class Work(object):
                 self.vim.call("setqflist", [], "a", result)
 
         if has_error:
-            self.vim.command("cwindow")
+            self._show_quickfix()
         else:
-            self.vim.command("cclose")
+            self._close_quickfix()
             write_msg(self.vim, "compile success!")
