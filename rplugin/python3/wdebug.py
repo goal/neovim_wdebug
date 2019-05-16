@@ -3,6 +3,8 @@ from pathlib import Path
 import time
 import subprocess
 import re
+import random
+import string
 
 import pynvim as nvim
 
@@ -90,8 +92,11 @@ class Work(object):
             write_err_msg(self.vim, "update fail")
 
     def _debug_values(self, values):
-        line = 'F_ERROR("debug. %s.", %s);' % (','.join('%s=%%O' % v for v in values),
-                                               ', '.join(values))
+        chars = string.ascii_letters + string.digits
+        firstn = random.randrange(0, 6)
+        ustr = random.choice(chars) * firstn + random.choice(chars) * (5 - firstn)
+        line = 'F_ERROR("%s. %s.", %s);' % (ustr, ','.join('%s=%%O' % v for v in values),
+                                            ', '.join(values))
         cw = self.vim.current.window
         r, c = cw.cursor
         spaces = " " * self.vim.call("cindent", r)
