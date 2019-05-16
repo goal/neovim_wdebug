@@ -125,7 +125,7 @@ class Work(object):
         else:
             r, c = cw.cursor
             self.vim.current.buffer[r - 1: r - 1] = [line]
-            spaces = " " * self.vim.call("cindent", r - 1)
+            spaces = " " * self.vim.call("cindent", r)
             self.vim.current.buffer[r - 1] = spaces + line
 
     def _show_quickfix(self):
