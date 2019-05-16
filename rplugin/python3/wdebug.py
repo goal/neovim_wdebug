@@ -33,6 +33,19 @@ def wait_file_content(file_path, old_size, total_wait_secs, check_internal, chec
     return False
 
 
+def try_find_func_definition(vim):
+    p_line = re.compile(r"^[^=]+(\s|\*)[^=]+\(.*\)$")
+    idx = cur_line = vim.current.line
+    buf = vim.current.buffer
+    lines = buf.splitlines()
+    while idx > 0:
+        idx -= 1
+        cur_line = lines[idx]
+        if p_line.match(cur_line):
+            return cur_line
+    return ""
+
+
 @nvim.plugin
 class Work(object):
 
@@ -52,6 +65,8 @@ class Work(object):
     @nvim.command('Rd', range='', nargs='*', sync=True)
     def rd_cmd(self, args, range):
         line = self.vim.current.line
+        if not line.strip():
+            line = try_find_func_definition(self.vim)
         s = line.replace("...", "").replace("*", "")
         s = s[s.index("("):s.index(")")]
         vs = []
