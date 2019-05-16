@@ -124,8 +124,9 @@ class Work(object):
             self.vim.current.line = spaces + line
         else:
             r, c = cw.cursor
+            self.vim.current.buffer[r - 1: r - 1] = [line]
             spaces = " " * self.vim.call("cindent", r - 1)
-            self.vim.current.buffer[r - 1: r - 1] = [spaces + line]
+            self.vim.current.buffer[r - 1] = spaces + line
 
     def _show_quickfix(self):
         # g:loaded_session test for denite-extra
