@@ -34,16 +34,19 @@ def wait_file_content(file_path, old_size, total_wait_secs, check_internal, chec
 
 
 def try_find_func_definition(vim):
-    p_line = re.compile(r"^[^=]+(\s|\*)[^=]+\(.*\)$")
-    idx = cur_line = vim.current.line
+    p_line = re.compile(r"^[^=]+(\s|\*)(?P<func_name>[^=]+)\(.*\)$")
+    line = vim.current.line
+    lineno = 0
+
+    idx = vim.call("line", ".")
     buf = vim.current.buffer
-    lines = buf.splitlines()
     while idx > 0:
         idx -= 1
-        cur_line = lines[idx]
-        if p_line.match(cur_line):
-            return cur_line
-    return ""
+        cur_line = buf[idx]
+        m = p_line.match(cur_line)
+        if m:
+            return cur_line, m.group("func_name"), idx
+    return "", "", 0
 
 
 @nvim.plugin
@@ -64,16 +67,16 @@ class Work(object):
 
     @nvim.command('Rd', range='', nargs='*', sync=True)
     def rd_cmd(self, args, range):
-        line = self.vim.current.line
+        line, func_name, lineno = try_find_func_definition(self.vim)
         if not line.strip():
-            line = try_find_func_definition(self.vim)
+            return
         s = line.replace("...", "").replace("*", "")
         s = s[s.index("("):s.index(")")]
         vs = []
         for x in s.split(","):
             t, v = x.strip().split()
             vs.append(v)
-        self._debug_values(vs)
+        self._debug_values(vs, func_name, lineno)
 
     @nvim.command('Ru', range='', nargs='*', sync=False)
     def ru_cmd(self, args, range):
@@ -106,16 +109,23 @@ class Work(object):
         else:
             write_err_msg(self.vim, "update fail")
 
-    def _debug_values(self, values):
-        chars = string.ascii_letters + string.digits
-        firstn = random.randrange(0, 6)
-        ustr = random.choice(chars) * firstn + random.choice(chars) * (5 - firstn)
-        line = 'F_ERROR("%s. %s.", %s);' % (ustr, ','.join('%s=%%O' % v for v in values),
+    def _debug_values(self, values, ustr="", lineno=0):
+        if not ustr:
+            chars = string.ascii_letters + string.digits
+            firstn = random.randrange(0, 6)
+            ustr = random.choice(
+                chars) * firstn + random.choice(chars) * (5 - firstn)
+        line = 'F_ERROR("%s. %s", %s);' % (ustr, ','.join('%s=%%O' % v for v in values),
                                             ', '.join(values))
         cw = self.vim.current.window
-        r, c = cw.cursor
-        spaces = " " * self.vim.call("cindent", r)
-        self.vim.current.line = spaces + line
+        if not lineno:
+            r, c = cw.cursor
+            spaces = " " * self.vim.call("cindent", r)
+            self.vim.current.line = spaces + line
+        else:
+            r, c = cw.cursor
+            spaces = " " * self.vim.call("cindent", r - 1)
+            self.vim.current.buffer[r - 1: r - 1] = [spaces + line]
 
     def _show_quickfix(self):
         # g:loaded_session test for denite-extra
