@@ -118,7 +118,7 @@ class Work(object):
             ustr = random.choice(
                 chars) * firstn + random.choice(chars) * (5 - firstn)
 
-        if value:
+        if values:
             line = 'F_ERROR("%s. %s", %s);' % (ustr, ','.join('%s=%%O' % v for v in values),
                                                ', '.join(values))
         else:
