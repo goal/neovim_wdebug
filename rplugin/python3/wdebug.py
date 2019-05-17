@@ -117,8 +117,13 @@ class Work(object):
             firstn = random.randrange(0, 6)
             ustr = random.choice(
                 chars) * firstn + random.choice(chars) * (5 - firstn)
-        line = 'F_ERROR("%s. %s", %s);' % (ustr, ','.join('%s=%%O' % v for v in values),
-                                           ', '.join(values))
+
+        if value:
+            line = 'F_ERROR("%s. %s", %s);' % (ustr, ','.join('%s=%%O' % v for v in values),
+                                               ', '.join(values))
+        else:
+            line = 'F_ERROR("%s.");' % ustr
+
         cw = self.vim.current.window
         if not lineno:
             r, c = cw.cursor
