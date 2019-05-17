@@ -71,7 +71,7 @@ class Work(object):
         if not line.strip():
             return
         s = line.replace("...", "").replace("*", "")
-        s = s[s.index("("):s.index(")")]
+        s = s[s.index("(") + 1:s.index(")")]
         vs = []
         for x in s.split(","):
             _xs = x.strip()
@@ -118,7 +118,7 @@ class Work(object):
             ustr = random.choice(
                 chars) * firstn + random.choice(chars) * (5 - firstn)
         line = 'F_ERROR("%s. %s", %s);' % (ustr, ','.join('%s=%%O' % v for v in values),
-                                            ', '.join(values))
+                                           ', '.join(values))
         cw = self.vim.current.window
         if not lineno:
             r, c = cw.cursor
