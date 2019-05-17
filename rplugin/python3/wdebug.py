@@ -74,8 +74,10 @@ class Work(object):
         s = s[s.index("("):s.index(")")]
         vs = []
         for x in s.split(","):
-            t, v = x.strip().split()
-            vs.append(v)
+            _xs = x.strip()
+            if _xs:
+                t, v = _xs.split()
+                vs.append(v)
         self._debug_values(vs, func_name, lineno)
 
     @nvim.command('Ru', range='', nargs='*', sync=False)
