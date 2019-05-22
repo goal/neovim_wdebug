@@ -119,10 +119,10 @@ class Work(object):
                 chars) * firstn + random.choice(chars) * (5 - firstn)
 
         if values:
-            line = 'F_ERROR("%s. %s", %s);' % (ustr, ','.join('%s=%%O' % v for v in values),
+            line = 'debug_message("%s. %s", %s);' % (ustr, ','.join('%s=%%O' % v for v in values),
                                                ', '.join(values))
         else:
-            line = 'F_ERROR("%s.");' % ustr
+            line = 'debug_message("%s.");' % ustr
 
         cw = self.vim.current.window
         if not lineno:
