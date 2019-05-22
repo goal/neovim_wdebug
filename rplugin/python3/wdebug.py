@@ -157,7 +157,7 @@ class Work(object):
             stderr=subprocess.PIPE)
         outdata, errdata = p.communicate()
 
-        all_lines = errdata.decode("utf8").splitlines()
+        all_lines = errdata.decode("utf8", errors="ignore").splitlines()
         error_patterns = {".+ line [\d]+: .*": "%f\ line\ %l:\ %m"}
 
         # clear quickfix list
