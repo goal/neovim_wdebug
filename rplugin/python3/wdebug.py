@@ -120,7 +120,7 @@ class Work(object):
 
         if values:
             line = 'debug_message("%s. %s", %s);' % (ustr, ','.join('%s=%%O' % v for v in values),
-                                               ', '.join(values))
+                                                     ', '.join(values))
         else:
             line = 'debug_message("%s.");' % ustr
 
@@ -158,7 +158,8 @@ class Work(object):
         outdata, errdata = p.communicate()
 
         all_lines = errdata.decode("utf8", errors="ignore").splitlines()
-        error_patterns = {".+ line [\d]+: .*": "%f\ line\ %l:\ %m"}
+        error_patterns = {".+ line [\d]+: .*": "%f\ line\ %l:\ %m",
+                          "\*/.+:[\d]+: .*": "*/%f:%l:\ %m"}
 
         # clear quickfix list
         self.vim.call("setqflist", [], "f")
