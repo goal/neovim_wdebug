@@ -156,6 +156,7 @@ class Work(object):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
         outdata, errdata = p.communicate()
+        retcode = p.returncode
 
         all_lines = errdata.decode("utf8", errors="ignore").splitlines()
         error_patterns = {".+ line [\d]+: .*": "%f\ line\ %l:\ %m",
@@ -181,4 +182,7 @@ class Work(object):
             self._show_quickfix()
         else:
             self._close_quickfix()
-            write_msg(self.vim, "compile success!")
+            if retcode:
+                write_msg(self.vim, f"compile exit with errno={retcode}")
+            else:
+                write_msg(self.vim, "compile success!")
