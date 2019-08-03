@@ -8,13 +8,7 @@ import string
 
 import pynvim as nvim
 
-
-def write_msg(vim, msg):
-    vim.command("echomsg '%s'" % msg)
-
-
-def write_err_msg(vim, msg):
-    vim.command("echohl Error | echomsg '%s' | echohl None" % msg)
+from wforce.common import write_msg, write_err_msg
 
 
 def wait_file_content(file_path, old_size, total_wait_secs, check_internal, check_content):
